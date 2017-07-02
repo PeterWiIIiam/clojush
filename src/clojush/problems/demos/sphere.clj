@@ -1,16 +1,16 @@
-(ns clojush.problems.demos.sphere-simple-regression-approach
+(ns clojush.problems.demos.sphere
   (:use [clojush.pushgp.pushgp]
         [clojush.pushstate]
         [clojush.random]
         [clojush.interpreter]
         [clojure.math.numeric-tower]))
 
-;; sphere_simple_regression_approach.clj
-
-
 ;;;;;;;;;;;;
 ;; Volume of a sphere 
 
+(defn sphere-volume
+  [radius]
+  (* (/ 4 3) (* 3.142 (* radius radius radius))))
 
 (def argmap
   {:error-function (fn [program]
@@ -22,17 +22,14 @@
                                top-float (top-item :float state)]
                            (if (number? top-float)
                              (abs (- top-float 
-                                     (* (/ 4 3) 
-                                        3.142 (* input input input))))
+                                     (sphere-volume input)))
                              1000000)))))    
-   :atom-generators (list ;(fn [] (float (lrand-int 10)))
+   :atom-generators (list (fn [] (lrand 10))
                           'in1
                           'float_div
                           'float_mult
                           'float_add
                           'float_sub
-                          3.0
-                          4.0
                           3.142)
    :max-points 500
    :max-genome-size-in-initial-program 125

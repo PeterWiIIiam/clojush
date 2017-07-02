@@ -1,4 +1,4 @@
-(ns clojush.bouncing-ball
+(ns clojush.problems.demos.bouncing-ball
   (:use [clojush.pushgp.pushgp]
         [clojush.random]
         [clojure.math.numeric-tower]

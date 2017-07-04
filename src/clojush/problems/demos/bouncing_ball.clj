@@ -27,9 +27,9 @@
 (defn error-function
   [program]
   (doall
-   (for [[input1 input2 input3] (repeatedly 100 #(vector (float (+ 100 (rand-int 101)))
-                                                         (float (inc (rand-int 150)))
-                                                         (inc (rand-int 50))))]
+   (for [[input1 input2 input3] (repeatedly 100 #(vector (+ 100.0 (rand 101))
+                                                         (inc (rand 150))
+                                                         (inc (rand-int 10))))]
         (let [state (run-push program
                               (push-item input3 :input
                                          (push-item input2 :input
@@ -60,9 +60,5 @@
                                     :uniform-close-mutation 0.1
                                     [:alternation :uniform-mutation] 0.5
                                     }
-   :alternation-rate 0.01
-   :alignment-deviation 10
-   :uniform-mutation-rate 0.01
    :error-threshold 1.0
-   :uniform-mutation-constant-tweak-rate 0
    })

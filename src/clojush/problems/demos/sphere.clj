@@ -31,9 +31,9 @@
                           'float_add
                           'float_sub
                           3.142)
-   :max-points 500
-   :max-genome-size-in-initial-program 125
-   :evalpush-limit 500
+   :max-points 200
+   :max-genome-size-in-initial-program 200
+   :evalpush-limit 200
    :population-size 1000
    :max-generations 300
    :epigenetic-markers []
@@ -42,10 +42,6 @@
                                     :uniform-mutation 0.3
                                     [:alternation :uniform-mutation] 0.5
                                     }
-   :alternation-rate 0.01
-   :alignment-deviation 10
-   :uniform-mutation-rate 0.01
    :error-threshold 0.1
-   :uniform-mutation-constant-tweak-rate 0
    })
 

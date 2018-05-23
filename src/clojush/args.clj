@@ -329,6 +329,9 @@
           :meta-error-categories []
           ;; A vector containing meta-error categories that can be used for parent selection, but
           ;; do not affect total error. See clojush.evaluate for options.
+
+          :meta-error-functions []
+          ;; A vector of meta-error producing functions
           
           :improvement-discount 0.5
           ;; The factor by successively older improvements are discounted when calculating

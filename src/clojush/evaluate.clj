@@ -1,5 +1,5 @@
 (ns clojush.evaluate
-  (:use [clojush util pushstate random globals individual]
+  (:use [clojush util pushstate random globals individual meta-error-test]
         clojush.pushgp.genetic-operators)
   (:require [clojure.math.numeric-tower :as math]
             [clj-random.core :as random]))
@@ -36,7 +36,15 @@
   :rand-bit (randomly 0 or 1)
   :age (minimize genealogical age of program)"
   [ind evaluated-population rand-gen
-   {:keys [meta-error-categories error-threshold improvement-discount] :as argmap}]
+   {:keys [meta-error-categories meta-error-functions error-threshold improvement-discount] :as argmap}]
+  (println "-----META ERROR FUNCTION TEST-----")
+  (let [meta-error-fns (map #(eval %)
+                            ;; The following would be necessary instead of the above if you don't want to have to namespace-qualify the command-line arguments
+                            #_#(binding [*ns* (find-ns 'clojush.meta-error-test)]
+                                     (eval %))
+                            meta-error-functions)]
+    (println "meta errors:" (map #(% ind evaluated-population argmap) meta-error-fns)))
+  (println "-----END META ERROR FUNCTION TEST-----")
   (random/with-rng 
     rand-gen
     (let [meta-error-fn 

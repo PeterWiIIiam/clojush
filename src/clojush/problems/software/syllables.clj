@@ -86,17 +86,19 @@
   [train-cases test-cases]
   (fn the-actual-syllables-error-function
     ([individual]
-      (the-actual-syllables-error-function individual :train))
+     (the-actual-syllables-error-function individual :train))
     ([individual data-cases] ;; data-cases should be :train or :test
      (the-actual-syllables-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (flatten
                      (doall
-                       (for [[input correct-output] (case data-cases
-                                                      :train train-cases
-                                                      :test test-cases
-                                                      [])]
+                       (for [[input correct-output]
+                             (cond
+                               (= data-cases :train) train-cases
+                               (= data-cases :test) test-cases
+                               (integer? data-cases) (list (nth train-cases data-cases))
+                               :else [])]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input :input)

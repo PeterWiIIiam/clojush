@@ -250,15 +250,16 @@
   ([ind error-function steps print-progress-interval simplification-step-probabilities]
     (when (not (zero? print-progress-interval))
       (printf "\nAuto-simplifying Plush genome with starting size: %s" (count (:genome ind))))
-    (let [case-per-input 2]
+    (let [case-per-input 2
+          most-important-case (:most-important-case ind)]
      (loop [step 0
             genome (:genome ind)
             program (if (:program ind)
                       (:program ind)
                       (translate-plush-genome-to-push-program ind
                                                               {:max-points (* 10 (count genome))}))
-            errors (:errors (error-function ind 
-                            (int (/ (:most-important-case ind) case-per-input))))]
+            errors (nth (error-function ind 
+                                        (quot most-important-case case-per-input)) (rem most-important-case case-per-input))]
        (when (and (not (zero? print-progress-interval))
                   (or (>= step steps)
                       (zero? (mod step print-progress-interval))))
@@ -274,12 +275,13 @@
          (let [new-genome (apply-simplification-step-to-genome genome simplification-step-probabilities)
                new-program (translate-plush-genome-to-push-program (assoc ind :genome new-genome)
                                                                    {:max-points (* 10 (count genome))})
-               new-errors (:errors (error-function {:program new-program} (int (/ (:most-important-case ind) case-per-input))))]
+               new-errors (nth (error-function {:program new-program} (quot most-important-case case-per-input)) (rem most-important-case case-per-input))]
                                         ;(println "most important case for the inidividual is" (:most-important-case ind))
-           (println (= new-errors errors)
-                    "if the program is smalller"(< (count-points new-program) (count-points program))
-                    "if genome is smaller" (< (count new-genome) (count genome)))
-           (if (and (= new-errors errors)
+           (println "new error" new-errors "error" errors)
+           (println "most important case" most-important-case "input number" (quot most-important-case case-per-input) 
+                    "case number" (rem most-important-case case-per-input))
+
+           (if (and (<= new-errors errors)
                     (<= (count-points new-program) (count-points program)))
              (recur (inc step) new-genome new-program new-errors)
              (recur (inc step) genome program errors))))))))

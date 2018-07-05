@@ -74,7 +74,7 @@
   "Recursively applies the genetic operators in operator-list, using
    first-parent as the first parent for each operator call, to create a new
    child."
-  [operator-list first-parent population location rand-gen argmap]
+  [operator-list first-parent population location rand-gen generation argmap]
   (if (empty? operator-list)
     first-parent
     (let [revertable (= (first operator-list) :make-next-operator-revertable)
@@ -87,12 +87,12 @@
                                (dec num-parents) 
                                (fn []
                                  (loop [re-selections 0
-                                        other (select population argmap)]
+                                        other (select population generation argmap)]
                                    (if (and (= other first-parent)
                                             (< re-selections 
                                                (:self-mate-avoidance-limit argmap)))
                                      (recur (inc re-selections)
-                                            (select population argmap))
+                                            (select population generation argmap))
                                      other)))))
           op-fn (:fn (get genetic-operators operator))
           child (assoc (apply op-fn (vec (concat (vector first-parent) 
@@ -107,6 +107,7 @@
              population
              location
              rand-gen
+             generation
              argmap))))
 
 (defn update-instruction-map-uuids
@@ -127,14 +128,14 @@
   "Takes a single genetic operator keyword or a sequence of operator keywords,
    and performs them to create a new individual. Uses recursive helper function
    even with a single operator by putting that operator in a vector."
-  [operator population location rand-gen 
+  [operator population location rand-gen generation 
    {:keys [max-points
            track-instruction-maps] :as argmap}]
-  (let [first-parent (select population argmap)
+  (let [first-parent (select population generation  argmap)
         operator-vector (if (sequential? operator) operator (vector operator))
         child (perform-genetic-operator-list operator-vector
                                              (assoc first-parent :parent-uuids (vector (:uuid first-parent)))
-                                             population location rand-gen argmap)]
+                                             population location rand-gen generation argmap)]
     (cond->
         (assoc child :genetic-operators operator)
 
@@ -148,7 +149,7 @@
 (defn breed
   "Returns an individual bred from the given population using the given parameters."
   [agt ;necessary since breed is called using swap! or send, even though not used
-   location rand-gen population
+   location rand-gen population generation 
    {:keys [genetic-operator-probabilities] :as argmap}]
   (random/with-rng rand-gen
     (let [prob (lrand)]
@@ -157,6 +158,6 @@
         (if (or (= 1 (count vectored-go-probabilities))
                 (<= prob (second (first vectored-go-probabilities))))
           (perform-genetic-operator (first (first vectored-go-probabilities)) 
-                                    population location rand-gen argmap)
+                                    population location rand-gen generation  argmap)
           (recur (rest vectored-go-probabilities)))))))
 

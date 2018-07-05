@@ -97,29 +97,33 @@
                              (cond
                                (= data-cases :train) train-cases
                                (= data-cases :test) test-cases
-                               (integer? data-cases) (list (nth train-cases data-cases))
-                               :else [])]
-                         (let [final-state (run-push (:program individual)
+                               (number? data-cases) (list (nth train-cases data-cases))
+                               :else [])]    
+                         (let [print-case (if (number? data-cases)
+                                           (println "train-cases" (list (nth train-cases data-cases))))
+                               final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input :input)
                                                        (push-item "" :output)))
                                printed-result (stack-ref :output 0 final-state)]
+                          
                            (when print-outputs
-                             (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str printed-result))))
+                             (println (format "\n| Correct output: %s\n| Program output: %s" (pr-str correct-output) (pr-str printed-result)))) 
                            ; Record the behavior
                            (swap! behavior conj printed-result)
                            ; Error is Levenshtein distance and, if ends in an integer, distance from correct integer
                            (vector
-                             (levenshtein-distance correct-output printed-result)
-                             (if-let [num-result (try (Integer/parseInt (last (string/split printed-result #"\s+")))
-                                                   (catch Exception e nil))]
-                               (abs (- (Integer/parseInt (last (string/split correct-output #"\s+")))
-                                       num-result)) ;distance from correct integer
-                               1000)
-                             )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+                            (levenshtein-distance correct-output printed-result)
+                            (if-let [num-result (try (Integer/parseInt (last (string/split printed-result #"\s+")))
+                                                     (catch Exception e nil))]
+                              (abs (- (Integer/parseInt (last (string/split correct-output #"\s+")))
+                                      num-result)) ;distance from correct integer
+                              1000))))))]
+
+        (cond 
+          (number? data-cases) errors
+          (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+          (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-syllables-train-and-test
   "Returns the train and test cases."
@@ -166,23 +170,21 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-syllables-error-function-from-cases (first syllables-train-and-test-cases)
-                                                             (second syllables-train-and-test-cases))
+  {:error-function (make-syllables-error-function-from-cases (take 10 (first syllables-train-and-test-cases))
+                                                              (take 10 (second syllables-train-and-test-cases)))
    :atom-generators syllables-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase
-   :genetic-operator-probabilities {:alternation 0.2
-                                    :uniform-mutation 0.2
-                                    :uniform-close-mutation 0.1
-                                    [:alternation :uniform-mutation] 0.5
+   :parent-selection :lexicase-with-most-important-case-mutate
+   :genetic-operator-probabilities {:uniform-addition-and-deletion 1
                                     }
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
+   :uniform-addition-and-deletion-rate 0.04
    :problem-specific-report syllables-report
    :problem-specific-initial-report syllables-initial-report
    :report-simplifications 0

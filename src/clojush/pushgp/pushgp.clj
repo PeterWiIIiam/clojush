@@ -94,7 +94,7 @@
   (when-not use-single-thread (apply await pop-agents))) ;; SYNCHRONIZE
 
 (defn produce-new-offspring
-  [pop-agents child-agents rand-gens
+  [pop-agents child-agents rand-gens generation
    {:keys [decimation-ratio population-size decimation-tournament-size use-single-thread]}]
   (let [pop (if (>= decimation-ratio 1)
               (vec (doall (map deref pop-agents)))
@@ -108,7 +108,7 @@
       ((if use-single-thread swap! send)
        (nth child-agents i)
        breed
-       i (nth rand-gens i) pop @push-argmap)))
+       i (nth rand-gens i) pop generation @push-argmap)))
   (when-not use-single-thread (apply await child-agents))) ;; SYNCHRONIZE
 
 (defn install-next-generation
@@ -198,6 +198,7 @@
                                   (produce-new-offspring pop-agents
                                                          child-agents
                                                          rand-gens
+                                                         generation
                                                          @push-argmap)
                                   (println "Installing next generation...") (flush)
                                   (install-next-generation pop-agents child-agents @push-argmap)

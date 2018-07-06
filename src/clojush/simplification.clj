@@ -1,6 +1,7 @@
 (ns clojush.simplification
   (:use [clojush util globals pushstate random individual evaluate translate]
-        clojush.pushgp.genetic-operators))
+        clojush.pushgp.genetic-operators
+        clojush.instructions.tag))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-simplification
@@ -303,7 +304,7 @@
      :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
 
   ([ind generation argmap]
-   (auto-mutate-plush-one-case ind argmap 1  1 ))
+   (auto-mutate-plush-one-case ind argmap 100  20 ))
   ([ind argmap steps print-progress-interval]
    (println "current steps are" steps)
     (auto-mutate-plush-one-case ind argmap steps print-progress-interval
@@ -368,3 +369,136 @@
            (if (<= new-errors errors)
              (recur (inc step) new-genome  new-errors)
              (recur (inc step) genome  errors))))))))
+
+
+
+(defn auto-constant-mutate-plush-one-case
+  "Automatically simplifies the genome of an individual without changing its error vector on
+   the training set, based on the error-function. steps is the number of hill-climbing evaluations
+   to test. print-progress-interval is how often to print progress of the simplification; if it is
+   set to 0, then nothing will be printed.
+   simplification-step-probabilities is a map of probabilities that are used to select what change
+   to make during each step of the simplification. Each change is represented as a map with the
+   following options for the keys, each of which has an integer of how many of those changes to make:
+     :silence - number of unsilenced or no-op genes to set :silent = true
+     :unsilence - number of silenced or no-op genes to set :silent = false
+     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
+
+  ([ind generation argmap]
+   (auto-mutate-plush-one-case ind argmap 100  20 ))
+  ([ind argmap steps print-progress-interval]
+   (println "current steps are" steps)
+    (auto-mutate-plush-one-case ind argmap steps print-progress-interval
+                         {{:silence 1} 0.5
+                          {:silence 2} 0.3
+                          {:silence 3} 0.1
+                          {:silence 4} 0.1
+                          ;{:silence 1 :unsilence 1} 0.05  ;Not used by default
+                          ;{:silence 2 :unsilence 1} 0.1   ;Not used by default
+                          ;{:silence 3 :unsilence 1} 0.05  ;Not used by default
+                          ;{:no-op 1} 0.05                 ;Not used by default
+                          }))
+  ([ind {:keys [error-function uniform-mutation-rate uniform-mutation-constant-tweak-rate
+               uniform-mutation-float-gaussian-standard-deviation
+               uniform-mutation-int-gaussian-standard-deviation
+               uniform-mutation-tag-gaussian-standard-deviation
+               uniform-mutation-string-char-change-rate
+               atom-generators] :as argmap
+} 
+    steps print-progress-interval simplification-step-probabilities]
+    (when (not (zero? print-progress-interval))
+      (printf "\nAuto-simplifying Plush genome with starting size: %s" (count (:genome ind))))
+    (let [case-per-input 2
+          most-important-case (:most-important-case ind)]
+   
+     (loop [step 0
+            genome (:genome ind)
+            errors (nth (error-function ind (quot most-important-case case-per-input)) (rem most-important-case case-per-input))]
+       (when (and (not (zero? print-progress-interval))
+                  (or (>= step steps)
+                      (zero? (mod step print-progress-interval))))
+         (println "\nstep:" step)
+         ;; (println "genome:" (pr-str (not-lazy genome)))
+         ;; (println "program:" (pr-str (not-lazy program)))
+         ;; (println "errors:" (not-lazy errors))
+         (println "genome size:" (count genome))
+         )
+         
+       (if (>= step steps)
+         (assoc ind :genome genome )
+
+         (let [uniform-mutation-rate 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
+                
+               uniform-mutation-constant-tweak-rate 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-constant-tweak-rate)
+                
+               uniform-mutation-float-gaussian-standard-deviation 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-float-gaussian-standard-deviation)
+                
+               uniform-mutation-int-gaussian-standard-deviation 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-int-gaussian-standard-deviation)
+                
+               uniform-mutation-tag-gaussian-standard-deviation 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-tag-gaussian-standard-deviation)
+                
+               uniform-mutation-string-char-change-rate 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-string-char-change-rate)
+                
+               string-tweak (fn [st]
+                              (apply str (map (fn [c]
+                                                (if (< (lrand) uniform-mutation-string-char-change-rate)
+                                                  (lrand-nth (vec (concat ["\n" "\t"] 
+                                                                          (map (comp str char) 
+                                                                               (range 32 127)))))
+                                                  c))
+                                              st)))
+               constant-mutator (fn [token]
+                                  (let [const (:instruction token)]
+                                    (if (tag-instruction? const)
+                                      (tag-gaussian-tweak token 
+                                                          uniform-mutation-tag-gaussian-standard-deviation)
+                                      (assoc token
+                                             :instruction
+                                             (cond
+                                               ;; float
+                                               (float? const) 
+                                               (perturb-with-gaussian-noise 
+                                                uniform-mutation-float-gaussian-standard-deviation const)
+                                               ;; integer
+                                               (integer? const) 
+                                               (Math/round (perturb-with-gaussian-noise 
+                                                       uniform-mutation-int-gaussian-standard-deviation const))
+                                               ;; string
+                                               (string? const) 
+                                               (string-tweak const)
+                                               ;; boolean
+                                               (or (= const true) (= const false)) 
+                                               ;; anything else
+                                               (lrand-nth [true false])
+                                               :else 
+                                               (:instruction 
+                                                (first (random-plush-genome 1 atom-generators argmap))))))))
+               token-mutator (fn [token]
+                               (if (< (lrand) uniform-mutation-rate)
+                                 (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                                   (constant-mutator ))
+                                 token))
+               new-genome (mapv token-mutator (:genome ind))
+              
+               new-program  (translate-plush-genome-to-push-program (assoc ind :genome new-genome)
+                                                                    {:max-points (* 10 (count genome))})
+               printing (println "case number"  (int (/ (:most-important-case ind) case-per-input)))
+               new-errors (nth (error-function {:program new-program} (quot most-important-case case-per-input)) 
+                               (rem most-important-case case-per-input))]                                        
+           
+           (println "new -erorrs" new-errors)
+           (println "errors" errors)
+           (println "most important case" most-important-case)
+           (println "input number" (quot most-important-case case-per-input))
+           (println "case number" (rem most-important-case case-per-input))
+
+           (if (<= new-errors errors)
+             (recur (inc step) new-genome  new-errors)
+             (recur (inc step) genome  errors))))))))
+

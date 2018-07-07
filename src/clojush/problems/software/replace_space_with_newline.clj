@@ -131,14 +131,16 @@
   ([individual]
    (replace-space-with-newline-error-function individual :train))
   ([individual data-cases] ;; data-cases should be :train or :test
-   (let [cases (case data-cases
-                 :train (first replace-space-with-newline-train-and-test-cases)
-                 :test (second replace-space-with-newline-train-and-test-cases)
-                 [])
+   (let [cases (cond 
+                 (number? data-cases) (list (nth (first replace-space-with-newline-train-and-test-cases) data-cases))
+                 (= data-cases :train) (first replace-space-with-newline-train-and-test-cases)
+                 (= data-cases :test) (second replace-space-with-newline-train-and-test-cases)
+                 :else [])
          behaviors (replace-space-with-newline-evaluate-program-for-behaviors (:program individual)
                                                                  cases)
          errors (replace-space-with-newline-errors-from-behaviors behaviors cases)]
      (cond
+       (number? data-cases) errors
        (= data-cases :train) (assoc individual :behaviors behaviors :errors errors)
        (= data-cases :test) (assoc individual :test-errors errors)))))
 
@@ -191,7 +193,7 @@
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase
+   :parent-selection :lexicase-with-most-important-case
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

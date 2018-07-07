@@ -303,7 +303,7 @@
      :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
 
   ([ind generation argmap]
-   (auto-mutate-plush-one-case ind argmap 1  1 ))
+   (auto-mutate-plush-one-case ind argmap 100  20 ))
   ([ind argmap steps print-progress-interval]
    (println "current steps are" steps)
     (auto-mutate-plush-one-case ind argmap steps print-progress-interval

@@ -78,10 +78,11 @@
     ([individual data-cases print-outputs]
      (let [behavior (atom '())
            errors (doall
-                   (for [[input1 correct-output] (case data-cases
-                                                   :train train-cases
-                                                   :test test-cases
-                                                   [])]
+                   (for [[input1 correct-output] (cond
+							(number? data-cases) (list (nth train-cases data-cases))
+                                                   	(= :train data-cases) train-cases
+                                                   	(= :test data-cases) test-cases
+                                                   :else [])]
                      (let [final-state (run-push (:program individual)
                                                  (->> (make-push-state)
                                                       (push-item input1 :input)))
@@ -100,9 +101,11 @@
                           1000000.0) ; penalty for no return value
                         4)
                        )))]
-       (if (= data-cases :train)
-         (assoc individual :behaviors @behavior :errors errors)
-         (assoc individual :test-errors errors))))))
+	(cond 
+		(= data-cases :train) (assoc individual :behaviors @behavior :errors errors)  
+      		(= data-cases :test)  (assoc individual :test-errors errors)
+		(number? data-cases) errors
+	)))))
 
 (defn get-vector-average-train-and-test
   "Returns the train and test cases."
@@ -148,15 +151,15 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-vector-average-error-function-from-cases (first vector-average-train-and-test-cases)
-                                                                  (second vector-average-train-and-test-cases))
+  {:error-function (make-vector-average-error-function-from-cases (take 5 (first vector-average-train-and-test-cases))
+                                                                  (take 5 (second vector-average-train-and-test-cases)))
    :atom-generators vector-average-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200
    :evalpush-limit 800
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase
+   :parent-selection :lexicase-with-most-important-case
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

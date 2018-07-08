@@ -612,6 +612,7 @@ given by uniform-deletion-rate."
         new-genome (vec (filter identity
                                 (mapv #(if (< (lrand) deletion-rate) nil %)
                                       after-addition)))]
+    (println "the age of the ind" (:age ind))
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))

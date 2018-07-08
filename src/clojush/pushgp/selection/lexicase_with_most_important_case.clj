@@ -56,7 +56,13 @@
     (if (or (empty? cases)
             (empty? (rest survivors))
             (< (lrand) (:lexicase-slippage argmap)))
-      (auto-constant-mutate-plush-one-case (assoc (lrand-nth survivors) :most-important-case last-case) generation argmap)
+      
+      (let [mutated-ind (auto-mutate-plush-one-case 
+        (assoc (lrand-nth survivors) :most-important-case last-case) generation argmap) ]
+        (if (< (lrand) 0.5)
+          (auto-constant-mutate-plush-one-case mutated-ind generation argmap))
+        mutated-ind)
+
       (let [min-err-for-case (apply min (map #(nth % (first cases))
                                              (map :errors survivors)))]
         (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)

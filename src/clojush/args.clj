@@ -70,6 +70,10 @@
           ;;----------------------------------------
           ;; Genetic operator probabilities
           ;;----------------------------------------
+          
+          :post-selection-genetic-operator :uniform-addition-and-deletion
+          ;; the genetic operation to be applied after to the selected individuals
+          ;; This is useful for applying genetic operator to both parents
 
           :genetic-operator-probabilities {:reproduction 0.0
                                            :alternation 0.7

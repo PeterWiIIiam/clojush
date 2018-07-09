@@ -178,7 +178,8 @@
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase-with-most-important-case-constant-mutate
+   :parent-selection :lexicase-with-most-important-case-any-genetic-operator
+   :post-selection-genetic-operator :uniform-addition-and-deletion
    :genetic-operator-probabilities {:uniform-addition-and-deletion 1
                                     }
    :alternation-rate 0.01

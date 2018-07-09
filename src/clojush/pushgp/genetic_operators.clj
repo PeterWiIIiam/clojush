@@ -195,7 +195,13 @@
 
 
 (defn uniform-constant-mutation
-  
+    [ind {:keys [uniform-mutation-rate uniform-mutation-constant-tweak-rate
+               uniform-mutation-float-gaussian-standard-deviation
+               uniform-mutation-int-gaussian-standard-deviation
+               uniform-mutation-tag-gaussian-standard-deviation
+               uniform-mutation-string-char-change-rate maintain-ancestors
+               atom-generators]
+        :as argmap}]
          (let [uniform-mutation-rate 
                (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
                 
@@ -253,13 +259,7 @@
                                  (if (< (lrand) uniform-mutation-constant-tweak-rate)
                                    (constant-mutator ))
                                  token))
-               new-genome (mapv token-mutator (:genome ind))
-              
-               new-program  (translate-plush-genome-to-push-program (assoc ind :genome new-genome)
-                                                                    {:max-points (* 10 (count genome))})
-               printing (println "case number"  (int (/ (:most-important-case ind) case-per-input)))
-               new-errors (nth (error-function {:program new-program} (quot most-important-case case-per-input)) 
-                               (rem most-important-case case-per-input))]
+               new-genome (mapv token-mutator (:genome ind))]
             
            (make-individual :genome new-genome
                      :history (:history ind)
@@ -267,7 +267,7 @@
                      :grain-size (compute-grain-size new-genome ind argmap)
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
-                                  (:ancestors ind)))) 
+                                  (:ancestors ind)))))
 
 
 (defn uniform-mutation

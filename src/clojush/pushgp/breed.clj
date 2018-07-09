@@ -11,6 +11,7 @@
    :alternation {:fn alternation :parents 2}
    :two-point-crossover {:fn two-point-crossover :parents 2}
    :uniform-crossover {:fn uniform-crossover :parents 2}
+   :uniform-constant-mutation {:fn uniform-constant-mutation :parents 1}
    :uniform-mutation {:fn uniform-mutation :parents 1}
    :uniform-instruction-mutation {:fn uniform-instruction-mutation :parents 1}
    :uniform-integer-mutation {:fn uniform-integer-mutation :parents 1}

@@ -193,6 +193,83 @@
                                                             (list (str new-tag-num))))))]
     (assoc instr-map :instruction new-instr)))
 
+
+(defn uniform-constant-mutation
+  
+         (let [uniform-mutation-rate 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-rate)
+                
+               uniform-mutation-constant-tweak-rate 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-constant-tweak-rate)
+                
+               uniform-mutation-float-gaussian-standard-deviation 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-float-gaussian-standard-deviation)
+                
+               uniform-mutation-int-gaussian-standard-deviation 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-int-gaussian-standard-deviation)
+                
+               uniform-mutation-tag-gaussian-standard-deviation 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-tag-gaussian-standard-deviation)
+                
+               uniform-mutation-string-char-change-rate 
+               (random-element-or-identity-if-not-a-collection uniform-mutation-string-char-change-rate)
+                
+               string-tweak (fn [st]
+                              (apply str (map (fn [c]
+                                                (if (< (lrand) uniform-mutation-string-char-change-rate)
+                                                  (lrand-nth (vec (concat ["\n" "\t"] 
+                                                                          (map (comp str char) 
+                                                                               (range 32 127)))))
+                                                  c))
+                                              st)))
+               constant-mutator (fn [token]
+                                  (let [const (:instruction token)]
+                                    (if (tag-instruction? const)
+                                      (tag-gaussian-tweak token 
+                                                          uniform-mutation-tag-gaussian-standard-deviation)
+                                      (assoc token
+                                             :instruction
+                                             (cond
+                                               ;; float
+                                               (float? const) 
+                                               (perturb-with-gaussian-noise 
+                                                uniform-mutation-float-gaussian-standard-deviation const)
+                                               ;; integer
+                                               (integer? const) 
+                                               (Math/round (perturb-with-gaussian-noise 
+                                                       uniform-mutation-int-gaussian-standard-deviation const))
+                                               ;; string
+                                               (string? const) 
+                                               (string-tweak const)
+                                               ;; boolean
+                                               (or (= const true) (= const false)) 
+                                               ;; anything else
+                                               (lrand-nth [true false])
+                                               :else 
+                                               (:instruction 
+                                                (first (random-plush-genome 1 atom-generators argmap))))))))
+               token-mutator (fn [token]
+                               (if (< (lrand) uniform-mutation-rate)
+                                 (if (< (lrand) uniform-mutation-constant-tweak-rate)
+                                   (constant-mutator ))
+                                 token))
+               new-genome (mapv token-mutator (:genome ind))
+              
+               new-program  (translate-plush-genome-to-push-program (assoc ind :genome new-genome)
+                                                                    {:max-points (* 10 (count genome))})
+               printing (println "case number"  (int (/ (:most-important-case ind) case-per-input)))
+               new-errors (nth (error-function {:program new-program} (quot most-important-case case-per-input)) 
+                               (rem most-important-case case-per-input))]
+            
+           (make-individual :genome new-genome
+                     :history (:history ind)
+                     :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))) 
+
+
 (defn uniform-mutation
   "Uniformly mutates individual. For each token in the genome, there is
    uniform-mutation-rate probability of being mutated. If a token is to be

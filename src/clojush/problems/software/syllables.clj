@@ -170,17 +170,17 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-syllables-error-function-from-cases  (take 5 (first syllables-train-and-test-cases))
-                                                              (take 5(second syllables-train-and-test-cases)))
+  {:error-function (make-syllables-error-function-from-cases   (first syllables-train-and-test-cases)
+                                                              (second syllables-train-and-test-cases))
    :atom-generators syllables-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
-   :max-generations 300
+   :max-generations 250
    :parent-selection :lexicase-with-most-important-case-any-genetic-operator
    :post-selection-genetic-operator :uniform-addition-and-deletion
-   :genetic-operator-probabilities {:uniform-addition-and-deletion 1
+   :genetic-operator-probabilities {:reproduction 1
                                     }
    :alternation-rate 0.01
    :alignment-deviation 10

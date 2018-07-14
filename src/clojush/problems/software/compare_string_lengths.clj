@@ -77,10 +77,11 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[[input1 input2 input3] correct-output] (case data-cases
-                                                                     :train train-cases
-                                                                     :test test-cases
-                                                                     [])]
+                     (for [[[input1 input2 input3] correct-output] (cond 
+                                                                     (= data-cases :train) train-cases
+                                                                     (= data-cases :test) test-cases
+                                                                     (number? data-cases) (list (nth train-cases data-cases)) 
+																	 :else [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input3 :input)
@@ -95,9 +96,10 @@
                          (if (= result correct-output)
                            0
                            1))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond 
+					(number? data-cases) errors 
+					(= data-cases :train)  (assoc individual :behaviors @behavior :errors errors)
+					(= data-cases :test) (assoc individual :test-errors errors))))))
   
 (defn get-compare-string-lengths-train-and-test
   "Returns the train and test cases."
@@ -150,8 +152,9 @@
    :max-genome-size-in-initial-program 200
    :evalpush-limit 600
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :uniform-addition-and-deletion-rate 0.04
+   :parent-selection :lexicase-with-most-important-case-mutate
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

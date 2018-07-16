@@ -91,6 +91,7 @@
      (the-actual-syllables-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
+            printing (println "the data case is" data-cases "the number of train-cases is" (count train-cases))
             errors (flatten
                      (doall
                        (for [[input correct-output]
@@ -170,16 +171,15 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-syllables-error-function-from-cases   (first syllables-train-and-test-cases)
-                                                              (second syllables-train-and-test-cases))
+  {:error-function (make-syllables-error-function-from-cases   (take 2 (first syllables-train-and-test-cases))
+                                                              (take 2 (second syllables-train-and-test-cases)))
    :atom-generators syllables-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 250
-   :parent-selection :lexicase-with-most-important-case-any-genetic-operator
-   :post-selection-genetic-operator :uniform-addition-and-deletion
+   :parent-selection :lexicase-with-most-important-case-mutate-more-steps
    :genetic-operator-probabilities {:reproduction 1
                                     }
    :alternation-rate 0.01

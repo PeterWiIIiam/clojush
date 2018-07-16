@@ -159,7 +159,7 @@
    :evalpush-limit 800
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase-with-most-important-case
+   :parent-selection :lexicase-with-most-important-case-mutate
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

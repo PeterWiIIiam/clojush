@@ -50,6 +50,7 @@
   Also, adds to the selected individual which case was most important in its
   selection."
   [pop generation argmap]
+  (println "call lexicase more steps")
   (loop [survivors pop
          cases (shuffle-cases pop argmap)
          last-case (first cases)]

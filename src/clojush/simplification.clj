@@ -392,10 +392,11 @@
      :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
 
   ([ind generation argmap]
-   (auto-mutate-plush-one-case ind argmap 100  1 ))
-  ([ind argmap steps print-progress-interval]
-   (println "current steps are" steps)
-    (auto-mutate-plush-one-case ind argmap steps print-progress-interval
+   (println "first arity")
+   (auto-mutate-plush-one-case-more-steps ind argmap 100  0 ))
+  ([ind argmap steps print-progress-interval] 
+   (println "second arity")
+    (auto-mutate-plush-one-case-more-steps ind argmap steps print-progress-interval
                          {{:silence 1} 0.5
                           {:silence 2} 0.3
                           {:silence 3} 0.1
@@ -407,12 +408,13 @@
                           }))
   ([ind {:keys [error-function uniform-addition-and-deletion-rate atom-generators] :as argmap}
     steps print-progress-interval simplification-step-probabilities] 
-    (when (not (zero? print-progress-interval))
-      (printf "\nAuto-simplifying Plush genome with starting size: %s" (count (:genome ind)))) 
-    (let [case-per-input 2
-          most-important-case (:most-important-case ind)
-          evaluation-interval 5]
-      
+   (println "call lexicase more steps haha")
+   (when (not (zero? print-progress-interval))
+     (printf "\nAuto-simplifying Plush genome with starting size: %s" (count (:genome ind)))) 
+   (let [case-per-input 2
+         most-important-case (:most-important-case ind)
+         evaluation-interval 5]
+     (println "case - per - input" case-per-input)
      (loop [step 0
             genome (:genome ind)
             errors (nth (error-function ind (quot most-important-case case-per-input)) (rem most-important-case case-per-input))]
@@ -423,11 +425,9 @@
          ;; (println "genome:" (pr-str (not-lazy genome)))
          ;; (println "program:" (pr-str (not-lazy program)))
          ;; (println "errors:" (not-lazy errors))
-         (println "genome size:" (count (:genoem ind))
-         )
-         
+         (println "genome size:" (count genome)))
        (if (>= step steps)     
-          (assoc ind :genome genome )
+          (assoc ind :genome genome)
           (let [addition-rate (random-element-or-identity-if-not-a-collection uniform-addition-and-deletion-rate)
                 deletion-rate (if (zero? addition-rate)
                                 0
@@ -451,7 +451,7 @@
                        (rem most-important-case case-per-input))
                   errors)]
 
-            (println "computer new errors" compute-new-errors)
+            (println "computer new errors" compute-new-errors "step" step)
             (println "new-erorrs" new-errors)
             (println "errors" errors compute-new-errors)
             (println "most important casessssssss" most-important-case)
@@ -460,7 +460,7 @@
             
             (if (<= new-errors errors)
               (recur (inc step) new-genome  new-errors)
-              (recur (inc step) genome  errors)))))))))
+              (recur (inc step) genome  errors))))))))
 
 (defn auto-constant-mutate-plush-one-case
   "Automatically simplifies the genome of an individual without changing its error vector on

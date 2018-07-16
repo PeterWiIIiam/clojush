@@ -91,7 +91,6 @@
      (the-actual-syllables-error-function individual data-cases false))
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
-            printing (println "the data case is" data-cases "the number of train-cases is" (count train-cases))
             errors (flatten
                      (doall
                        (for [[input correct-output]

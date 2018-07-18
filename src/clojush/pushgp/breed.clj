@@ -9,7 +9,10 @@
 (def genetic-operators
   {:reproduction {:fn reproduction :parents 1}
    :alternation {:fn alternation :parents 2}
+   :delete {:fn delete :parents 1}
+   :duplicate {:fn duplicate :parents 1}
    :two-point-crossover {:fn two-point-crossover :parents 2}
+   :swap {:fn swap :parents 1}
    :uniform-crossover {:fn uniform-crossover :parents 2}
    :uniform-constant-mutation {:fn uniform-constant-mutation :parents 1}
    :uniform-mutation {:fn uniform-mutation :parents 1}
@@ -24,6 +27,7 @@
    :uniform-deletion {:fn uniform-deletion :parents 1}
    :uniform-addition {:fn uniform-addition :parents 1}
    :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1}
+   :uniform-addition-and-deletion-duplication-swap {:fn uniform-addition-deletion-duplication-swap :parents 1}
    :uniform-combination {:fn uniform-combination :parents 2}
    :uniform-combination-and-deletion {:fn uniform-combination-and-deletion :parents 2}
    :genesis {:fn genesis :parents 1} ;; the parent will be ignored

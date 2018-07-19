@@ -152,7 +152,7 @@
                         0
                         (/ 1 (+ (/ 1 addition-rate) 1)))
         duplication-rate 0.05
-        swap-rate 0.05
+        swap-rate 0.1
         after-addition (vec (apply concat
                                    (mapv #(if (< (lrand) addition-rate)
                                             (lshuffle [% 
@@ -185,7 +185,6 @@
                     after-duplication)
         new-genome after-swap]
 
-    (println "the age of the ind" (:age ind))
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
@@ -206,8 +205,8 @@
         deletion-rate (if (zero? addition-rate)
                         0
                         (/ 1 (+ (/ 1 addition-rate) 1)))
-        duplication-rate 0.05
-        swap-rate 0.05
+        duplication-rate addition-rate
+        swap-rate 0.1
 
         addition-length 2
         deletion-length 2

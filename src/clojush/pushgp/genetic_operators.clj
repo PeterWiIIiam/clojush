@@ -168,13 +168,14 @@
                                                [% %]
                                                [%])
                                                after-deletion)))
-        after-swap (
-                    #(loop [i 0
+        swap-length 1
+        after-swap (#(loop [i 0
                             result-genome []]
                        
                        (if (= i (count %))
                          result-genome
-                         (if (< (lrand) swap-rate)
+                         (if (and (< (lrand) swap-rate)
+                                  (< (+ i 1) (count %)))
                            (recur 
                             (+ 2 i)
                             (conj result-genome (nth % (+ i 1)) (nth % i)))
@@ -183,6 +184,7 @@
                             (conj result-genome (nth % i))))))
                     after-duplication)
         new-genome after-swap]
+
     (println "the age of the ind" (:age ind))
     (make-individual :genome new-genome
                      :history (:history ind)
@@ -191,6 +193,96 @@
                      :ancestors (if maintain-ancestors
                                   (cons (:genome ind) (:ancestors ind))
                                   (:ancestors ind)))))
+
+
+(defn uniform-addition-deletion-duplication-swap-section
+  "Returns the individual after two passes of mutation. In the first pass, each element of 
+  its genome may possibly be preceded or followed by a new gene. In the second pass, each
+  element of the genome may possibly be deleted. Probabilities are given by 
+  uniform-addition-and-deletion-rate."
+  [ind {:keys [uniform-addition-and-deletion-rate maintain-ancestors atom-generators] 
+        :as argmap}]
+  (let [addition-rate (random-element-or-identity-if-not-a-collection uniform-addition-and-deletion-rate)
+        deletion-rate (if (zero? addition-rate)
+                        0
+                        (/ 1 (+ (/ 1 addition-rate) 1)))
+        duplication-rate 0.05
+        swap-rate 0.05
+
+        addition-length 2
+        deletion-length 2
+        duplication-length 2
+        swap-length 2
+
+        after-addition (vec (apply concat
+                                   (mapv #(if (< (lrand) addition-rate)
+                                            (let [addition-genome (loop [addition-genome []
+                                                                         counter 0]
+                                                                    (if (= counter addition-length)
+                                                                      addition-genome
+                                                                      (recur (conj addition-genome 
+                                                                                   (random-plush-instruction-map
+                                                                                    atom-generators
+                                                                                    argmap))
+                                                                             (inc counter))))]
+                                              (lshuffle (conj addition-genome %)))
+                                            [%])
+                                         (:genome ind)))) 
+        
+        after-deletion (#(loop [i 0
+                                result-genome []]
+                           (if (= i (count %))
+                             result-genome
+                             (if (and (< (lrand) deletion-rate)
+                                      (< (+ i deletion-length) (count %)))
+                               (recur 
+                                (+ deletion-length i)
+                                result-genome)
+                               (recur 
+                                (inc i)
+                                (conj result-genome (nth % i))))))
+                        after-addition)
+
+        after-duplication  (#(loop [i 0
+                                result-genome []]
+                           (if (= i (count %))
+                             result-genome
+                             (if (and (< (lrand) duplication-rate)
+                                      (< (+ i duplication-length) (count %)))
+                               (recur 
+                                i
+                                (vec (concat (subvec % i (+ i duplication-length)) result-genome)))
+                               (recur 
+                                (inc i)
+                                (conj result-genome (nth % i))))))
+                        after-deletion)
+
+        after-swap (#(loop [i 0
+                            result-genome []]
+                       
+                       (if (>= i (count %))
+                         result-genome
+                         (if (and (< (lrand) swap-rate)
+                                  (< (+ i (* 2 swap-length)) (count %)))
+                           (recur 
+                            (+ (* 2 swap-length) i)
+                            (vec  (concat result-genome (subvec % i (+ i swap-length)) (subvec % (+ i swap-length) (+ i (* 2 swap-length))))))
+                           (recur 
+                            (inc i)
+                            (conj result-genome (nth % i))))))
+                    after-duplication)
+        new-genome after-swap]
+
+    (println "the age of the ind" (:age ind))
+    (make-individual :genome new-genome
+                     :history (:history ind)
+                     :age (inc (:age ind))
+                     :grain-size (compute-grain-size new-genome ind argmap)
+                     :ancestors (if maintain-ancestors
+                                  (cons (:genome ind) (:ancestors ind))
+                                  (:ancestors ind)))))
+
+
 
 (defn delete
   [ind argmap]

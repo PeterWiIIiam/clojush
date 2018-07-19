@@ -28,6 +28,7 @@
    :uniform-addition {:fn uniform-addition :parents 1}
    :uniform-addition-and-deletion {:fn uniform-addition-and-deletion :parents 1}
    :uniform-addition-and-deletion-duplication-swap {:fn uniform-addition-deletion-duplication-swap :parents 1}
+   :uniform-addition-and-deletion-duplication-swap-section {:fn uniform-addition-deletion-duplication-swap-section :parents 1}
    :uniform-combination {:fn uniform-combination :parents 2}
    :uniform-combination-and-deletion {:fn uniform-combination-and-deletion :parents 2}
    :genesis {:fn genesis :parents 1} ;; the parent will be ignored

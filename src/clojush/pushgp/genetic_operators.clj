@@ -272,7 +272,6 @@
                     after-duplication)
         new-genome after-swap]
 
-    (println "the age of the ind" (:age ind))
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
@@ -886,7 +885,7 @@ given by uniform-deletion-rate."
         new-genome (vec (filter identity
                                 (mapv #(if (< (lrand) deletion-rate) nil %)
                                       after-addition)))]
-    (println "the age of the ind" (:age ind))
+   
     (make-individual :genome new-genome
                      :history (:history ind)
                      :age (inc (:age ind))
@@ -990,8 +989,6 @@ given by uniform-deletion-rate."
                                 (conj result-genome (nth (if use-s1 s1 s2) i))
                                 (dec iteration-budget)))))]
     ;;; Printing just for proof-of-concept
-    (println "Parent 1 most important test case:" (:most-important-case parent1))
-    (println "Parent 2 most important test case:" (:most-important-case parent2))
     (make-individual :genome new-genome
                      :history (:history parent1)
                      :age ((age-combining-function argmap) parent1 parent2 new-genome)

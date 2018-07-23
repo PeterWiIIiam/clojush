@@ -28,6 +28,7 @@
                    :lexicase-with-most-important-case-constant-mutate (lexicase-with-most-important-case-selection-constant-mutate preselected generation argmap)
                    :lexicase-with-most-important-case-mutate-more-steps (lexicase-with-most-important-case-selection-mutate-more-steps preselected generation argmap)
                    :lexicase-with-most-important-case-any-genetic-operator (lexicase-with-most-important-case-selection-any-genetic-operator preselected generation argmap)
+                   :lexicase-with-most-important-case-constant-mutate-more-steps (lexicase-with-most-important-case-selection-constant-mutate-more-steps preselected generation argmap)
                    :novelty-search (novelty-tournament-selection preselected argmap)
                    :uniform (lrand-nth preselected)
                    (throw (Exception. (str "Unrecognized argument for parent-selection: "

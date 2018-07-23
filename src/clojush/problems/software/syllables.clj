@@ -99,9 +99,7 @@
                                (= data-cases :test) test-cases
                                (number? data-cases) (list (nth train-cases data-cases))
                                :else [])]    
-                         (let [print-case (if (number? data-cases)
-                                           (println "train-cases" (list (nth train-cases data-cases))))
-                               final-state (run-push (:program individual)
+                         (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input :input)
                                                        (push-item "" :output)))
@@ -171,14 +169,14 @@
 ; Define the argmap
 (def argmap
   {:error-function (make-syllables-error-function-from-cases   (first syllables-train-and-test-cases)
-                                                              (second syllables-train-and-test-cases))
+                                                               (second syllables-train-and-test-cases))
    :atom-generators syllables-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
    :max-generations 250
-   :parent-selection :lexicase-with-most-important-case-constant-mutate
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

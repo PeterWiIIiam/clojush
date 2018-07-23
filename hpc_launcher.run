@@ -28,6 +28,7 @@ SELECTION="lexicase-with-most-important-case-constant-mutate"
 # Results will go to our shared results directory (helmuth). You may have a symlink to this directory called Collab.
 # Make sure the correct subdirectory follows helmuth -- the first subdirectory should be
 # your username (in my case, thelmuth).
+
 DIRECTORY="/usr/local/research/compsci/helmuth/xhe/Results/standard-lexicase-constant-mutate/$SELECTION/$NAMESPACE" 
 PUSHARGS=":parent-selection :$SELECTION :print-timings true"
 

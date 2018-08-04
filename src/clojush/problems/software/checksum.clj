@@ -93,10 +93,11 @@
       (let [behavior (atom '())
             errors (flatten
                      (doall
-                       (for [[input correct-output] (case data-cases
-                                                      :train train-cases
-                                                      :test test-cases
-                                                      [])]
+                       (for [[input correct-output] (cond 
+                                                      (= data-cases :train) train-cases
+                                                      (= data-cases :test) test-cases
+                                                      (number? data-cases) (list (nth train-cases data-cases))
+                                                      :else [])]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input :input)
@@ -113,9 +114,10 @@
                                (abs (- (int (last correct-output)) (int (last printed-result)))) ;distance from correct last character
                                1000) ;penalty for wrong format
                              )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond  
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-checksum-train-and-test
   "Returns the train and test cases."
@@ -170,7 +172,7 @@
    :evalpush-limit 1500
    :population-size 1000
    :max-generations 300
-   :parent-selection :lexicase
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

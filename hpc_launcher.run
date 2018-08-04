@@ -1,4 +1,4 @@
-#PBS -N standard-lexicase-constant-mutate-more-steps-random-cases
+#PBS -N standard-lexicase-constant-mutate-more-steps
 #PBS -l nodes=1:ppn=8
 #PBS -l mem=20GB
 #PBS -q una
@@ -20,7 +20,7 @@ NP=`cat $PBS_NODEFILE | wc -l`  # Bash syntax
 
 
 #NAMESPACE="replace-space-with-newline"
-NAMESPACE="syllables"
+NAMESPACE="check-sum"
 #NAMESPACE="number-io"
 
 SELECTION="lexicase-with-most-important-case-constant-mutate-more-steps"

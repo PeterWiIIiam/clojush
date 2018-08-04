@@ -228,16 +228,7 @@
             (recur (inc step) genome program errors)))))))
 
 (defn auto-simplify-plush-one-case
-  "Automatically simplifies the genome of an individual without changing its error vector on
-   the training set, based on the error-function. steps is the number of hill-climbing evaluations
-   to test. print-progress-interval is how often to print progress of the simplification; if it is
-   set to 0, then nothing will be printed.
-   simplification-step-probabilities is a map of probabilities that are used to select what change
-   to make during each step of the simplification. Each change is represented as a map with the
-   following options for the keys, each of which has an integer of how many of those changes to make:
-     :silence - number of unsilenced or no-op genes to set :silent = true
-     :unsilence - number of silenced or no-op genes to set :silent = false
-     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
+  ; Apply hill climbing simplification. Change case-per-input based on problem's error function.
 
   ([ind generation argmap]
    (auto-simplify-plush-one-case ind (:error-function argmap) 1  1 ))
@@ -297,16 +288,10 @@
 
 
 (defn auto-mutate-plush-one-case
-  "Automatically simplifies the genome of an individual without changing its error vector on
-   the training set, based on the error-function. steps is the number of hill-climbing evaluations
-   to test. print-progress-interval is how often to print progress of the simplification; if it is
-   set to 0, then nothing will be printed.
-   simplification-step-probabilities is a map of probabilities that are used to select what change
-   to make during each step of the simplification. Each change is represented as a map with the
-   following options for the keys, each of which has an integer of how many of those changes to make:
-     :silence - number of unsilenced or no-op genes to set :silent = true
-     :unsilence - number of silenced or no-op genes to set :silent = false
-     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
+  ; Apply UMAD hill climbing
+  ; Change the case-per-input based on individual problem's error function.
+  ; If the error function output two errors for a single input,
+  ; change the case-per-input to 2.
 
   ([ind generation argmap]
    (auto-mutate-plush-one-case ind argmap 20  0))
@@ -379,16 +364,10 @@
 
 
 (defn auto-mutate-plush-one-case-elastic-more-steps
-  "Automatically simplifies the genome of an individual without changing its error vector on
-   the training set, based on the error-function. steps is the number of hill-climbing evaluations
-   to test. print-progress-interval is how often to print progress of the simplification; if it is
-   set to 0, then nothing will be printed.
-   simplification-step-probabilities is a map of probabilities that are used to select what change
-   to make during each step of the simplification. Each change is represented as a map with the
-   following options for the keys, each of which has an integer of how many of those changes to make:
-     :silence - number of unsilenced or no-op genes to set :silent = true
-     :unsilence - number of silenced or no-op genes to set :silent = false
-     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
+  ; Apply UMAD hill climbing. Change the case-per-input based on
+  ; individual problem's error function. If the error function output two errors for a single input,
+  ; change the case-per-input to 2. This function essentially only apply UMAD hill climbing for one step.
+  ; This funcion is for experiment purpose.
 
   ([ind generation argmap]
    (println "first arity")
@@ -458,22 +437,16 @@
             (println "case number" (rem most-important-case case-per-input))
             
             (if compute-new-errors
-                (if (< new-errors errors)
+                (if (<= new-errors errors)
                   (recur (inc step) new-genome  new-errors)
                   (recur (inc step) genome  errors)))))))))
 
 
 (defn auto-mutate-plush-one-case-more-steps
-  "Automatically simplifies the genome of an individual without changing its error vector on
-   the training set, based on the error-function. steps is the number of hill-climbing evaluations
-   to test. print-progress-interval is how often to print progress of the simplification; if it is
-   set to 0, then nothing will be printed.
-   simplification-step-probabilities is a map of probabilities that are used to select what change
-   to make during each step of the simplification. Each change is represented as a map with the
-   following options for the keys, each of which has an integer of how many of those changes to make:
-     :silence - number of unsilenced or no-op genes to set :silent = true
-     :unsilence - number of silenced or no-op genes to set :silent = false
-     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
+  ; Apply UMAD hill climbing. You can set the evaluation interval in the first let function, which determines
+  ; the amount of steps that hill climbing will take place before evaluating the error.
+  ; Change the case-per-input based on individual problem's error function. If the error function
+  ; output two errors for a single input, change the case-per-input to 2.
 
   ([ind generation argmap]
    (println "first arity")
@@ -541,16 +514,9 @@
 
 
 (defn auto-constant-mutate-plush-one-case
-  "Automatically simplifies the genome of an individual without changing its error vector on
-   the training set, based on the error-function. steps is the number of hill-climbing evaluations
-   to test. print-progress-interval is how often to print progress of the simplification; if it is
-   set to 0, then nothing will be printed.
-   simplification-step-probabilities is a map of probabilities that are used to select what change
-   to make during each step of the simplification. Each change is represented as a map with the
-   following options for the keys, each of which has an integer of how many of those changes to make:
-     :silence - number of unsilenced or no-op genes to set :silent = true
-     :unsilence - number of silenced or no-op genes to set :silent = false
-     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
+  ; Apply UMAD hill climbing with 0.5 probability of using constant mutation at each hill climbing step.
+  ; Change the case-per-input based on individual problem's error function. If the error function output
+  ; two errors for a single input, change the case-per-input to 2.
 
   ([ind generation argmap]
    (auto-constant-mutate-plush-one-case ind argmap 20  0 ))
@@ -606,16 +572,10 @@
 
 
 (defn auto-constant-mutate-plush-one-case-more-steps
-  "Automatically simplifies the genome of an individual without changing its error vector on
-   the training set, based on the error-function. steps is the number of hill-climbing evaluations
-   to test. print-progress-interval is how often to print progress of the simplification; if it is
-   set to 0, then nothing will be printed.
-   simplification-step-probabilities is a map of probabilities that are used to select what change
-   to make during each step of the simplification. Each change is represented as a map with the
-   following options for the keys, each of which has an integer of how many of those changes to make:
-     :silence - number of unsilenced or no-op genes to set :silent = true
-     :unsilence - number of silenced or no-op genes to set :silent = false
-     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
+  ; Apply UMAD hill climbing with 0.5 probability of using constant mutation at each hill climbing step.
+  ; You can set the evaluation interval in the first let function. Change the case-per-input based on
+  ; individual problem's error function. If the error function output two errors for a single input,
+  ; change the case-per-input to 2.
 
   ([ind generation argmap]
    (auto-constant-mutate-plush-one-case-more-steps ind argmap 100  20 ))
@@ -678,16 +638,8 @@
 
 
 (defn auto-apply-genetic-operator-plush-one-case
-  "Automatically simplifies the genome of an individual without changing its error vector on
-   the training set, based on the error-function. steps is the number of hill-climbing evaluations
-   to test. print-progress-interval is how often to print progress of the simplification; if it is
-   set to 0, then nothing will be printed.
-   simplification-step-probabilities is a map of probabilities that are used to select what change
-   to make during each step of the simplification. Each change is represented as a map with the
-   following options for the keys, each of which has an integer of how many of those changes to make:
-     :silence - number of unsilenced or no-op genes to set :silent = true
-     :unsilence - number of silenced or no-op genes to set :silent = false
-     :no-op - number of unsilenced or silenced genes to set :silent = :no-op"
+    ; Process the individual with any genetic operator and hill climbing. The genetic operator to be
+    ; applied is marked by :post-selection-genetic-operator key in argmap.S
 
   ([ind generation argmap]
    (auto-apply-genetic-operator-plush-one-case ind argmap 100 0))

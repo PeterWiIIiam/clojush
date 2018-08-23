@@ -99,10 +99,11 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[input correct-output] (case data-cases
-                                                    :train train-cases
-                                                    :test test-cases
-                                                    [])]
+                     (for [[input correct-output]  (cond
+                                                    (= :train data-cases) train-cases
+                                                    (= :test data-cases) test-cases
+                                                    (number? data-cases) (list (nth train-cases data-cases))
+                                                    :else [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input :input)
@@ -115,9 +116,11 @@
                          ; Error is Levenshtein distance for printed string
                          (levenshtein-distance correct-output result)
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
+
 
 (defn get-pig-latin-train-and-test
   "Returns the train and test cases."
@@ -164,15 +167,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-pig-latin-error-function-from-cases (first pig-latin-train-and-test-cases)
-                                                             (second pig-latin-train-and-test-cases))
+  {:error-function (make-pig-latin-error-function-from-cases (take 5 (first pig-latin-train-and-test-cases))
+                                                             (take 5 (second pig-latin-train-and-test-cases)))
    :atom-generators pig-latin-atom-generators
    :max-points 4000
    :max-genome-size-in-initial-program 500
    :evalpush-limit 2000
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :uniform-addition-and-deletion-rate 0.04
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

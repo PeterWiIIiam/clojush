@@ -119,13 +119,15 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[input1 correct-output] (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
+                     (for [[input1 correct-output] 
+                           (cond
+                            (= :train data-cases) train-cases
+                            (= :test data-cases) test-cases
+                            (number? data-cases) (list (nth train-cases data-cases))
+                            :else [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
-                                                     (push-item input1 :input)))
+                                                        (push-item input1 :input)))
                              result (stack-ref :integer 0 final-state)]
                          (when print-outputs
                            (println (format "Correct output: %3d | Program output: %s" correct-output (str result))))
@@ -136,9 +138,10 @@
                            (abs (- result correct-output)) ;distance from correct integer
                            1000) ;penalty for no return value
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-scrabble-score-train-and-test
   "Returns the train and test cases."
@@ -185,15 +188,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-scrabble-score-error-function-from-cases (first scrabble-score-train-and-test-cases)
-                                                                  (second scrabble-score-train-and-test-cases))
+  {:error-function (make-scrabble-score-error-function-from-cases (take 5 (first scrabble-score-train-and-test-cases))
+                                                                  (take 5 (second scrabble-score-train-and-test-cases)))
    :atom-generators scrabble-score-atom-generators
    :max-points 4000
    :max-genome-size-in-initial-program 500
    :evalpush-limit 2000
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :uniform-addition-and-deletion-rate 0.04
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

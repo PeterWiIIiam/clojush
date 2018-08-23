@@ -69,10 +69,13 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[input1 correct-output] (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
+                     (for [[input1 correct-output] 
+                           (cond
+                            (= :train data-cases) train-cases
+                            (= :test data-cases) test-cases
+                            (number? data-cases) (list (nth train-cases data-cases))
+                            :else [])]
+                      
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input1 :input)
@@ -84,9 +87,11 @@
                          (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
                          (levenshtein-distance correct-output result))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
+       
 
 (defn get-small-or-large-train-and-test
   "Returns the train and test cases."
@@ -132,15 +137,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-small-or-large-error-function-from-cases (first small-or-large-train-and-test-cases)
-                                                                  (second small-or-large-train-and-test-cases))
+  {:error-function (make-small-or-large-error-function-from-cases (take 5 (first small-or-large-train-and-test-cases))
+                                                                  (take 5 (second small-or-large-train-and-test-cases)))
    :atom-generators small-or-large-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100
    :evalpush-limit 300
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :uniform-addition-and-deletion-rate 0.04
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

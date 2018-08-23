@@ -77,10 +77,11 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[input1 correct-output] (case data-cases
-                                                     :train train-cases
-                                                     :test test-cases
-                                                     [])]
+                     (for [[input1 correct-output] (cond 
+                                                     (= :train train-cases) train-cases
+                                                     (= :test test-cases) test-cases
+                                                     (number? data-cases) (list (nth train-cases data-cases))
+                                                     :else [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input1 :input)
@@ -92,9 +93,10 @@
                          (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
                          (levenshtein-distance correct-output result))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond 
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test)(assoc individual :test-errors errors))))))
 
 (defn get-digits-train-and-test
   "Returns the train and test cases."
@@ -140,15 +142,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-digits-error-function-from-cases (first digits-train-and-test-cases)
+  {:error-function (make-digits-error-function-from-cases  (first digits-train-and-test-cases)
                                                           (second digits-train-and-test-cases))
    :atom-generators digits-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
+   :uniform-mutation-and-deletion-rate 0.04
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

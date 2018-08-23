@@ -593,7 +593,7 @@
     steps print-progress-interval simplification-step-probabilities]
     (when (not (zero? print-progress-interval))
       (printf "\nAuto-simplifying Plush genome with starting size: %s" (count (:genome ind))))
-    (let [case-per-input 1
+    (let [case-per-input 2
           evaluation-interval 5
           most-important-case (:most-important-case ind)]
    

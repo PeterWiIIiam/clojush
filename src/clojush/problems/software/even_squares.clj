@@ -67,10 +67,11 @@
       (let [behavior (atom '())
             errors (flatten
                      (doall
-                       (for [[input1 [correct-output correct-integers]] (case data-cases
-                                                                          :train train-cases
-                                                                          :test test-cases
-                                                                          [])]
+                       (for [[input1 [correct-output correct-integers]] (cond
+                                                                          (= :train data-cases) train-cases
+                                                                          (= :test data-cases) test-cases
+                                                                          (number? data-cases) (list (nth train-cases data-cases))
+                                                                          :else [])]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input1 :input)
@@ -106,9 +107,10 @@
                                                     100 ; penalty for not enough lines with parseable integers
                                                     (abs (- cor-int res-int))))
                                                 correct-result-int-pairs)))))))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond          
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-even-squares-train-and-test
   "Returns the train and test cases."
@@ -155,15 +157,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-even-squares-error-function-from-cases (first even-squares-train-and-test-cases)
-                                                                (second even-squares-train-and-test-cases))
+  {:error-function (make-even-squares-error-function-from-cases (take 5 (first even-squares-train-and-test-cases))
+                                                                (take 5 (second even-squares-train-and-test-cases)))
    :atom-generators even-squares-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200
    :evalpush-limit 2000
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :uniform-addition-and-deletion-rate 0.04
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

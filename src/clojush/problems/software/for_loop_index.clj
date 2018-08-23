@@ -81,10 +81,11 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[[input1 input2 input3] correct-output] (case data-cases
-                                                                     :train train-cases
-                                                                     :test test-cases
-                                                                     [])]
+                     (for [[[input1 input2 input3] correct-output]  (cond
+                                                                          (= :train data-cases) train-cases
+                                                                          (= :test data-cases) test-cases
+                                                                          (number? data-cases) (list (nth train-cases data-cases))
+                                                                          :else [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input3 :input)
@@ -98,9 +99,10 @@
                          (swap! behavior conj result)
                          ; Error is Levenshtein distance of printed strings
                          (levenshtein-distance correct-output result))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-for-loop-index-train-and-test
   "Returns the train and test cases."
@@ -146,15 +148,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-for-loop-index-error-function-from-cases (first for-loop-index-train-and-test-cases)
-                                                                  (second for-loop-index-train-and-test-cases))
+  {:error-function (make-for-loop-index-error-function-from-cases (take 4 (first for-loop-index-train-and-test-cases))
+                                                                  (take 4(second for-loop-index-train-and-test-cases)))
    :atom-generators loop-atom-generators
    :max-points 1200
    :max-genome-size-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :uniform-addition-and-deletion-rate 0.04
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

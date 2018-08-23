@@ -133,16 +133,18 @@
   ([individual]
    (mirror-image-error-function individual :train))
   ([individual data-cases] ;; data-cases should be :train or :test
-   (let [cases (case data-cases
-                 :train (first mirror-image-train-and-test-cases)
-                 :test (second mirror-image-train-and-test-cases)
-                 [])
+   (let [cases  (cond
+                 (= :train data-cases) (first mirror-image-train-and-test-cases)
+                 (= :test data-cases) (second mirror-image-train-and-test-cases)
+                 (number? data-cases) (list (nth (first mirror-image-train-and-test-cases) data-cases))
+                 :else [])
          behaviors (mirror-image-evaluate-program-for-behaviors (:program individual)
                                                                  cases)
          errors (mirror-image-errors-from-behaviors behaviors cases)]
      (cond
-       (= data-cases :train) (assoc individual :behaviors behaviors :errors errors)
-       (= data-cases :test) (assoc individual :test-errors errors)))))
+      (number? data-cases) errors
+      (= data-cases :train) (assoc individual :behaviors behaviors :errors errors)
+      (= data-cases :test) (assoc individual :test-errors errors)))))
 
 (defn mirror-image-initial-report
   [argmap]
@@ -188,8 +190,8 @@
    :max-genome-size-in-initial-program 150
    :evalpush-limit 600
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

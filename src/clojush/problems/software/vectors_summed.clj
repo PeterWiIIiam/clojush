@@ -85,10 +85,12 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[[input1 input2] correct-output] (case data-cases
-                                                              :train train-cases
-                                                              :test test-cases
-                                                              [])]
+                     (for [[[input1 input2] correct-output] 
+                           (cond
+                            (= :train data-cases) train-cases
+                            (= :test data-cases) test-cases
+                            (number? data-cases) (list (nth train-cases data-cases))
+                            :else [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input2 :input)
@@ -107,10 +109,10 @@
                                (*' 10000 (abs (- (count correct-output) (count result))))) ; penalty of 10000 times difference in sizes of vectors
                            1000000000) ; penalty for no return value
                          )))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
-
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 (defn get-vectors-summed-train-and-test
   "Returns the train and test cases."
   [data-domains]
@@ -155,15 +157,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-vectors-summed-error-function-from-cases (first vectors-summed-train-and-test-cases)
-                                                                  (second vectors-summed-train-and-test-cases))
+  {:error-function (make-vectors-summed-error-function-from-cases (take 5 (first vectors-summed-train-and-test-cases))
+                                                                  (take 5 (second vectors-summed-train-and-test-cases)))
    :atom-generators vectors-summed-atom-generators
    :max-points 2000
    :max-genome-size-in-initial-program 250
    :evalpush-limit 1500
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
+   :uniform-addition-and-deletion-rate 0.04
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

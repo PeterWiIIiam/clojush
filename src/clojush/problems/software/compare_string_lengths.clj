@@ -154,7 +154,7 @@
    :population-size 1000
    :max-generations 250
    :uniform-addition-and-deletion-rate 0.04
-   :parent-selection :lexicase-with-most-important-case-mutate
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

@@ -63,10 +63,11 @@
       (let [behavior (atom '())
             errors (flatten
                      (doall
-                       (for [[[in-float in-int] out-float] (case data-cases
-                                                             :train train-cases
-                                                             :test test-cases
-                                                             [])]
+                       (for [[[in-float in-int] out-float]  (cond
+                                                             (= :train data-cases) train-cases
+                                                             (= :test data-cases) test-cases
+                                                             (number? data-cases) (list (nth train-cases data-cases))
+                                                             :else [])]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item in-int :input)
@@ -87,9 +88,10 @@
                                        (catch Exception e 1000.0))
                                      4)
                                    (levenshtein-distance printed-result (pr-str (round-to-n-decimal-places out-float 10))))))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-number-io-train-and-test
   "Returns the train and test cases."
@@ -135,15 +137,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-number-io-error-function-from-cases (first number-io-train-and-test-cases)
-                                                             (second number-io-train-and-test-cases))
+  {:error-function (make-number-io-error-function-from-cases (take 5 (first number-io-train-and-test-cases))
+                                                             (take 5 (second number-io-train-and-test-cases)))
    :atom-generators num-io-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100
    :evalpush-limit 200
    :population-size 1000
-   :max-generations 200
-   :parent-selection :lexicase
+   :max-generations 250
+   :uniform-addition-and-deletion-rate 0.04 
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :epigenetic-markers []
    :genetic-operator-probabilities {:alternation 0.3
                                     :uniform-mutation 0.2

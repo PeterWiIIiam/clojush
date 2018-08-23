@@ -70,10 +70,12 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[[input1 input2 input3 input4] out-int] (case data-cases
-                                                                     :train train-cases
-                                                                     :test test-cases
-                                                                     [])]
+                     (for [[[input1 input2 input3 input4] out-int]
+                           (cond
+                            (= :train data-cases) train-cases
+                            (= :test data-cases) test-cases
+                            (number? data-cases) (list (nth train-cases data-cases))
+                            :else [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input4 :input)
@@ -90,9 +92,10 @@
                          (if (= printed-result (str out-int))
                            0
                            1))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-smallest-train-and-test
   "Returns the train and test cases."
@@ -138,15 +141,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-smallest-error-function-from-cases (first smallest-train-and-test-cases)
-                                                            (second smallest-train-and-test-cases))
+  {:error-function (make-smallest-error-function-from-cases (take 5 (first smallest-train-and-test-cases))
+                                                            (take 5 (second smallest-train-and-test-cases)))
    :atom-generators smallest-atom-generators
    :max-points 800
    :max-genome-size-in-initial-program 100
    :evalpush-limit 200
    :population-size 1000
-   :max-generations 200
-   :parent-selection :lexicase
+   :max-generations 250
+   :uniform-addition-and-deletion-rate 0.04
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :epigenetic-markers [:close]
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2

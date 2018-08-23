@@ -131,10 +131,11 @@
       (let [behavior (atom '())
             errors (flatten
                      (doall
-                       (for [[[input1 input2 input3 input4 input5] correct-output] (case data-cases
-                                                                                     :train train-cases
-                                                                                     :test test-cases
-                                                                                     [])]
+                       (for [[[input1 input2 input3 input4 input5] correct-output] (cond
+                                                                                     (= :train data-cases) train-cases
+                                                                                     (= :test data-cases) test-cases
+                                                                                     (number? data-cases) (list (nth train-cases data-cases))
+                                                                                     :else [])]
                          (let [final-state (run-push (:program individual)
                                                      (->> (make-push-state)
                                                        (push-item input5 :input)
@@ -158,9 +159,10 @@
                                          (int (first printed-letter)))) ;distance from correct character
                                  1000))
                              )))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-grade-train-and-test
   "Returns the train and test cases."
@@ -206,15 +208,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-grade-error-function-from-cases (first grade-train-and-test-cases)
-                                                         (second grade-train-and-test-cases))
+  {:error-function (make-grade-error-function-from-cases (take 5 (first grade-train-and-test-cases))
+                                                         (take 5 (second grade-train-and-test-cases)))
    :atom-generators grade-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200
    :evalpush-limit 800
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :uniform-addition-and-deletion-rate 0.04
+   :max-generations 250
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :epigenetic-markers [:close]
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2

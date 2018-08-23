@@ -125,10 +125,12 @@
     ([individual data-cases print-outputs]
       (let [behavior (atom '())
             errors (doall
-                     (for [[[input1 input2] correct-output] (case data-cases
-                                                              :train train-cases
-                                                              :test test-cases
-                                                              [])]
+                     (for [[[input1 input2] correct-output]
+                            (cond
+                             (= :train data-cases) train-cases
+                             (= :test data-cases) test-cases
+                             (number? data-cases) (list (nth train-cases data-cases))
+                             :else [])]
                        (let [final-state (run-push (:program individual)
                                                    (->> (make-push-state)
                                                      (push-item input2 :input)
@@ -143,9 +145,10 @@
                          (if (= result correct-output)
                            0
                            1))))]
-        (if (= data-cases :train)
-          (assoc individual :behaviors @behavior :errors errors)
-          (assoc individual :test-errors errors))))))
+        (cond
+         (number? data-cases) errors
+         (= data-cases :train) (assoc individual :behaviors @behavior :errors errors)
+         (= data-cases :test) (assoc individual :test-errors errors))))))
 
 (defn get-super-anagrams-train-and-test
   "Returns the train and test cases."
@@ -192,15 +195,16 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-super-anagrams-error-function-from-cases (first super-anagrams-train-and-test-cases)
-                                                                  (second super-anagrams-train-and-test-cases))
+  {:error-function (make-super-anagrams-error-function-from-cases (take 5 (first super-anagrams-train-and-test-cases))
+                                                                  (take 5 (second super-anagrams-train-and-test-cases)))
    :atom-generators super-anagrams-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase
+   :max-generations 250
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
+   :uniform-addition-and-deletion-rate 0.04
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

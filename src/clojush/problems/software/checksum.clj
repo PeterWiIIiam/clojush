@@ -171,7 +171,7 @@
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1500
    :population-size 1000
-   :max-generations 300
+   :max-generations 250
    :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
@@ -179,6 +179,7 @@
                                     [:alternation :uniform-mutation] 0.5
                                     }
    :alternation-rate 0.01
+   :uniform-addition-and-deletion-rate 0.04
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
    :problem-specific-report checksum-report

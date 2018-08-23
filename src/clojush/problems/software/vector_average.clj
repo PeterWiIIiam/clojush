@@ -151,15 +151,15 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-vector-average-error-function-from-cases (take 5 (first vector-average-train-and-test-cases))
-                                                                  (take 5 (second vector-average-train-and-test-cases)))
+  {:error-function (make-vector-average-error-function-from-cases (first vector-average-train-and-test-cases)
+                                                                  (second vector-average-train-and-test-cases))
    :atom-generators vector-average-atom-generators
    :max-points 1600
    :max-genome-size-in-initial-program 200
    :evalpush-limit 800
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase-with-most-important-case-mutate
+   :max-generations 250
+   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
@@ -168,6 +168,7 @@
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
+   :uniform-addition-and-deletion-rate 0.04
    :problem-specific-report vector-average-report
    :problem-specific-initial-report vector-average-initial-report
    :report-simplifications 0

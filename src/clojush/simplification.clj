@@ -553,7 +553,6 @@
          
        (if (>= step steps)
          (assoc ind :genome genome )
-
          (let [UMAD-ind (uniform-addition-and-deletion ind argmap)
                new-genome 
                (if (< (lrand) 0.5) 
@@ -594,15 +593,13 @@
     steps print-progress-interval simplification-step-probabilities]
     (when (not (zero? print-progress-interval))
       (printf "\nAuto-simplifying Plush genome with starting size: %s" (count (:genome ind))))
-    (let [case-per-input 2
+    (let [case-per-input 1
           evaluation-interval 5
           most-important-case (:most-important-case ind)]
    
      (loop [step 0
             genome (:genome ind)
             errors (nth ((:error-function argmap)  ind (quot most-important-case case-per-input)) (rem most-important-case case-per-input))]
-
-
        (when (and (not (zero? print-progress-interval))
                   (or (>= step steps)
                       (zero? (mod step print-progress-interval))))

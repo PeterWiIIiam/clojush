@@ -20,7 +20,8 @@ NP=`cat $PBS_NODEFILE | wc -l`  # Bash syntax
 
 
 #NAMESPACE="replace-space-with-newline"
-NAMESPACE="check-sum"
+NAMESPACE="vector-average"
+NAMESPACE="count-odds"
 #NAMESPACE="number-io"
 
 SELECTION="lexicase-with-most-important-case-constant-mutate-more-steps"

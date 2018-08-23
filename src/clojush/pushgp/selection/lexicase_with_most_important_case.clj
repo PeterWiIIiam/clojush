@@ -104,7 +104,7 @@
              (empty? (rest survivors))
              (< (lrand) (:lexicase-slippage argmap)))
 
-       (auto-constant-mutate-plush-one-case-more-steps (assoc (lrand-nth survivors) :most-important-case (lrand-int case-num)) generation argmap)
+       (auto-constant-mutate-plush-one-case-more-steps (assoc (lrand-nth survivors) :most-important-case last-case) generation argmap)
        (let [min-err-for-case (apply min (map #(nth % (first cases))
                                               (map :errors survivors)))]
          (recur (filter #(= (nth (:errors %) (first cases)) min-err-for-case)

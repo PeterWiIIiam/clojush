@@ -111,6 +111,44 @@
           ;; Arguments related to genetic operators
           ;;----------------------------------------
 
+          ;; HC genetic operator hyperparameters
+          :error-per-input 2
+          ;; In UMADHC, error-per-input is the number of error for a single input into the error function.
+          ;; For example, if error-per-input is 2, then the output from the error function is a vector
+          ;; of length 2, given 1 input.
+
+          :error-per-input-dict {:checksum 2
+                                 :compare-string-lengths 2
+                                 :count-odds 2
+                                 :digits 2
+                                 :double-letters 2
+                                 :even-squares 2
+                                 :for-loop-index 2
+                                 :grade 2
+                                 :last-index-of-zero 2
+                                 :median 2
+                                 :mirror-image 2
+                                 :negative-to-zero 2
+                                 :number-io 2
+                                 :pig-latin 2
+                                 :replace-space-with-newline 2
+                                 :scrabble-score 2
+                                 :small-or-large 2
+                                 :smallest 2
+                                 :string-lengths-backwards 2
+                                 :sum-of-squares 2
+                                 :super-anagrams 2
+                                 :syllables 2
+                                 :vectors-average 2
+                                 :vectors-summed 2}
+
+          :hill-climbing-genetic-operator :uniform-addition-and-deletion
+          ;; In UMADHC, :hill-climbing-genetic-operator is the genetic operator that will be applied
+          ;; through hill climbing.
+
+          :hill-climbing-steps 20
+          ;; The hill climbing steps in one generation.
+
           :alternation-rate 0.01
           ;; When using alternation, the probability of alternating between the parents when moving
           ;; to the next gene.

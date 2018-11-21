@@ -168,15 +168,40 @@
 
 ; Define the argmap
 (def argmap
-  {:error-function (make-syllables-error-function-from-cases   (first syllables-train-and-test-cases)
-                                                               (second syllables-train-and-test-cases))
+  {:error-function (make-syllables-error-function-from-cases   (take 5 (first syllables-train-and-test-cases))
+                                                               (take 5 (second syllables-train-and-test-cases)))
    :atom-generators syllables-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
-   :max-generations 300
-   :parent-selection :lexicase-with-most-important-case-constant-mutate-more-steps
+   :max-generations 250
+   :parent-selection :lexicase-with-most-important-case-constant-mutate
+   :error-per-input (:syllables {:checksum 2
+                                 :compare-string-lengths 2
+                                 :count-odds 2
+                                 :digits 2
+                                 :double-letters 2
+                                 :even-squares 2
+                                 :for-loop-index 2
+                                 :grade 2
+                                 :last-index-of-zero 2
+                                 :median 2
+                                 :mirror-image 2
+                                 :negative-to-zero 2
+                                 :number-io 2
+                                 :pig-latin 2
+                                 :replace-space-with-newline 2
+                                 :scrabble-score 2
+                                 :small-or-large 2
+                                 :smallest 2
+                                 :string-lengths-backwards 2
+                                 :sum-of-squares 2
+                                 :super-anagrams 2
+                                 :syllables 2
+                                 :vectors-average 2
+                                 :vectors-summed 2})
+   :hill-climbing-steps 20
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1

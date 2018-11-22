@@ -168,6 +168,7 @@
 
 ; Define the argmap
 (def argmap
+  ; remember to remove 4
   {:error-function (make-syllables-error-function-from-cases   (take 5 (first syllables-train-and-test-cases))
                                                                (take 5 (second syllables-train-and-test-cases)))
    :atom-generators syllables-atom-generators
@@ -175,33 +176,19 @@
    :max-genome-size-in-initial-program 400
    :evalpush-limit 1600
    :population-size 1000
-   :max-generations 250
-   :parent-selection :lexicase-with-most-important-case-constant-mutate
-   :error-per-input (:syllables {:checksum 2
-                                 :compare-string-lengths 2
-                                 :count-odds 2
-                                 :digits 2
-                                 :double-letters 2
-                                 :even-squares 2
-                                 :for-loop-index 2
-                                 :grade 2
-                                 :last-index-of-zero 2
-                                 :median 2
-                                 :mirror-image 2
-                                 :negative-to-zero 2
-                                 :number-io 2
-                                 :pig-latin 2
-                                 :replace-space-with-newline 2
-                                 :scrabble-score 2
-                                 :small-or-large 2
-                                 :smallest 2
-                                 :string-lengths-backwards 2
-                                 :sum-of-squares 2
-                                 :super-anagrams 2
-                                 :syllables 2
-                                 :vectors-average 2
-                                 :vectors-summed 2})
+
+   ; UMADHC parameters
+
+   :parent-selection :lexicase-with-most-important-case-mutate
+   ; remember to change problems when running different problems
+   :current-problem :syllables
    :hill-climbing-steps 20
+   :max-generations (quot (* 300 100) (+ 100 20)) ; 20 depends on the number of hill climbing steps
+   :hill-climbing-constant-mutation-rate 0.4
+   :uniform-addition-and-deletion-rate 0.04
+   :uniform-mutation-constant-tweak-rate 0.5
+
+
    :genetic-operator-probabilities {:alternation 0.2
                                     :uniform-mutation 0.2
                                     :uniform-close-mutation 0.1
@@ -210,7 +197,8 @@
    :alternation-rate 0.01
    :alignment-deviation 10
    :uniform-mutation-rate 0.01
-   :uniform-addition-and-deletion-rate 0.04
+   :uniform-close-mutation-rate 0.1
+
    :problem-specific-report syllables-report
    :problem-specific-initial-report syllables-initial-report
    :report-simplifications 0

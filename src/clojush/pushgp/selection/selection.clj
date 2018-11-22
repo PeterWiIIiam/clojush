@@ -25,7 +25,6 @@
                                      (lexicase-selection preselected argmap))
                    :lexicase-with-most-important-case (lexicase-with-most-important-case-selection preselected generation argmap)
                    :lexicase-with-most-important-case-mutate (lexicase-with-most-important-case-selection-mutate preselected generation argmap)
-                   :lexicase-with-most-important-case-constant-mutate (lexicase-with-most-important-case-selection-constant-mutate preselected generation argmap)
                    :lexicase-with-most-important-case-mutate-more-steps (lexicase-with-most-important-case-selection-mutate-more-steps preselected generation argmap)
                    :lexicase-with-most-important-case-any-genetic-operator (lexicase-with-most-important-case-selection-any-genetic-operator preselected generation argmap)
                    :lexicase-with-most-important-case-constant-mutate-more-steps (lexicase-with-most-important-case-selection-constant-mutate-more-steps preselected generation argmap)

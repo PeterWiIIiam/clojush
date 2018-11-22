@@ -117,6 +117,8 @@
           ;; For example, if error-per-input is 2, then the output from the error function is a vector
           ;; of length 2, given 1 input.
 
+          :current-problem :syllables
+
           :error-per-input-dict {:checksum 2
                                  :compare-string-lengths 2
                                  :count-odds 2
@@ -148,6 +150,9 @@
 
           :hill-climbing-steps 20
           ;; The hill climbing steps in one generation.
+
+          :hill-climbing-constant-mutation-rate 0.5
+          ;; The probablity of performing constant mutation during UMADHC
 
           :alternation-rate 0.01
           ;; When using alternation, the probability of alternating between the parents when moving

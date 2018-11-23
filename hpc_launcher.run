@@ -1,4 +1,4 @@
-#PBS -N standard-lexicase-constant-mutate-more-steps
+#PBS -N umad_0.1_hc_cm_0_steps_20_cm_tweak_0.5 
 #PBS -l nodes=1:ppn=8
 #PBS -l mem=20GB
 #PBS -q una
@@ -25,8 +25,8 @@ SELECTION="lexicase-with-most-important-case-mutate"
 #Hill climbing parameters
 HCSTEPS="20"
 MAXGEN=$((300 * 100 / ($HCSTEPS + 100)))
-HC_CM_RATE="0.5"
-UMAD_RATE="0.5"
+HC_CM_RATE="0"
+UMAD_RATE="0.1"
 CM_TWEAK_RATE="0.5"
 
 

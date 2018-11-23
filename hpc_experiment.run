@@ -1,0 +1,30 @@
+#Things needed to change
+NAMESPACE="replace-space-with-newline"
+SELECTION="lexicase-with-most-important-case-mutate"
+
+#Hill climbing parameters
+HCSTEPS="20"
+MAXGEN=$((300 * 100 / ($HCSTEPS + 100)))
+HC_CM_RATE="0.5"
+UMAD_RATE="0.5"
+CM_TWEAK_RATE="0.5"
+
+
+DIRECTORY="/usr/local/research/compsci/helmuth/xhe/Results/runs-for-paper/$SELECTION/$NAMESPACE"
+PUSHARGS=":print-timings true \
+:parent-selection $SELECTION \
+:current-problem $NAMESPACE \
+:hill-climbing-steps HCSTEPS \
+:max-generations $MAXGEN \
+:hill-climbing-constant-mutation-rate $HC_CM_RATE \
+:uniform-addition-and-deletion-rate $UMAD_RATE \
+:uniform-mutation-constant-tweak-rate $CM_TWEAK_RATE"
+PROBLEM="clojush.problems.software.$NAMESPACE"
+
+
+# Results will go to our shared results directory (helmuth). You may have a symlink to this directory called Collab.
+# Make sure the correct subdirectory follows helmuth -- the first subdirectory should be
+# your username (in my case, thelmuth).
+
+LEINCMD="lein with-profiles production trampoline run $PROBLEM $PUSHARGS"
+$LEINCMD

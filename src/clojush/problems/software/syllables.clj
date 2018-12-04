@@ -169,8 +169,8 @@
 ; Define the argmap
 (def argmap
   ; remember to remove 4
-  {:error-function (make-syllables-error-function-from-cases   (take 5 (first syllables-train-and-test-cases))
-                                                               (take 5 (second syllables-train-and-test-cases)))
+  {:error-function (make-syllables-error-function-from-cases   (first syllables-train-and-test-cases)
+                                                               (second syllables-train-and-test-cases))
    :atom-generators syllables-atom-generators
    :max-points 3200
    :max-genome-size-in-initial-program 400

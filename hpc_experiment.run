@@ -1,20 +1,20 @@
 #Things needed to change
-NAMESPACE="replace-space-with-newline"
+NAMESPACE="syllables"
 SELECTION="lexicase-with-most-important-case-mutate"
 
 #Hill climbing parameters
 HCSTEPS="20"
 MAXGEN=$((300 * 100 / ($HCSTEPS + 100)))
 HC_CM_RATE="0.5"
-UMAD_RATE="0.5"
+UMAD_RATE="0.04"
 CM_TWEAK_RATE="0.5"
 
 
 DIRECTORY="/usr/local/research/compsci/helmuth/xhe/Results/runs-for-paper/$SELECTION/$NAMESPACE"
 PUSHARGS=":print-timings true \
-:parent-selection $SELECTION \
-:current-problem $NAMESPACE \
-:hill-climbing-steps HCSTEPS \
+:parent-selection :$SELECTION \
+:current-problem :$NAMESPACE \
+:hill-climbing-steps $HCSTEPS \
 :max-generations $MAXGEN \
 :hill-climbing-constant-mutation-rate $HC_CM_RATE \
 :uniform-addition-and-deletion-rate $UMAD_RATE \
